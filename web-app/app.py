@@ -24,4 +24,7 @@ def upload():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
+<<<<<<< HEAD:web-app/App.py
     
+=======
+>>>>>>> 1951c5fab92dc74e7b00b82f1215fb432eb8c922:web-app/app.py

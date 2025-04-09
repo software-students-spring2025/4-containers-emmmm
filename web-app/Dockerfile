@@ -1,15 +1,27 @@
-# in Docker, it is common to base a new image on a previously-created image
+# Use an official lightweight Python image based on Alpine Linux.
+FROM python:3.10-alpine
 
-FROM python:3.10-slim
-# Set the working directory within the image to /app
-WORKDIR /app
-# the ADD command is how you add files from your local machine into a Docker image
+# Set the working directory in the container.
+WORKDIR /usr/src/app
 
-# Copy the current directory contents into the container at /app
-ADD . .
-# Install any needed packages specified in requirements.txt
-RUN pip3 install -r requirements.txt
+# Install system dependencies required for building Python packages.
+RUN apk add --no-cache gcc musl-dev linux-headers
+
+# Copy Pipfile and Pipfile.lock into the container.
+COPY Pipfile Pipfile.lock ./
+
+# Install pipenv and project dependencies in one step.
+RUN pip install pipenv && \
+    pipenv install --deploy --ignore-pipfile
+
+# Copy the rest of the application source code into the container.
+COPY . .
+
+# Expose the port that the Flask app will run on.
 EXPOSE 8000
 
-# Run app.py when the container launches
-CMD ["python3", "app.py"]
+# Set the environment variable for Flask (note: ensure app.py is your entry point).
+ENV FLASK_APP=app.py
+
+# Define the command to run your Flask app.
+CMD ["pipenv", "run", "flask", "run", "--host=0.0.0.0", "--port=8000"]

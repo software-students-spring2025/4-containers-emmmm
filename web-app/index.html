@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Emotion Detector</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    
+    button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+    
+    button:hover:not(:disabled) {
+      background-color: #218838;
+    }
+    
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .recording-indicator {
+      height: 12px;
+      width: 12px;
+      background-color: red;
+      border-radius: 50%;
+      margin-right: 10px;
+      animation: blink 1s step-start infinite;
+    }
+    
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+    
+    #audioPlayback {
+      margin-top: 20px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Voice Emotion Detector</h1>
+    <button id="startBtn">Start Recording</button>
+    <button id="stopBtn" disabled>Stop Recording</button>
+    <p id="status">
+      Idle
+    </p>
+    <!-- Audio element for playback -->
+    <audio id="audioPlayback" controls style="display: none;"></audio>
+  </div>
+  
+  <script>
+    let mediaRecorder;
+    let recordedChunks = [];
+    let audioBlob;
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusText = document.getElementById('status');
+    const audioPlayback = document.getElementById('audioPlayback');
+
+    // Function to start recording
+    startBtn.addEventListener('click', async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorder.addEventListener('dataavailable', (e) => {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      });
+      
+      mediaRecorder.addEventListener('stop', () => {
+        audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+        recordedChunks = [];
+        
+        const audioURL = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioURL;
+        audioPlayback.style.display = 'block';
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          statusText.innerHTML = 'Audio uploaded successfully';
+        })
+        .catch(error => {
+          statusText.innerHTML = 'Upload failed';
+          console.error('Upload error:', error);
+        });
+      });
+      
+      mediaRecorder.start();
+      statusText.innerHTML = '<div class="recording-indicator"></div>Recording...';
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    });
+
+    // Function to stop recording
+    stopBtn.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        statusText.textContent = 'Processing recording...';
+      }
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    });
+  </script>
+</body>
+</html>

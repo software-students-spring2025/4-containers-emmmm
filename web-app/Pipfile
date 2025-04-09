@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 pylint = "*"
 black = "*"
+requests = "*"
+pymongo = "*"
+dotenv = "*"
 
 [dev-packages]
 

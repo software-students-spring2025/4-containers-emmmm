@@ -1,0 +1,17 @@
+[tool.black]
+line-length = 88
+target-version = ['py310']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | __pycache__
+  | build
+  | dist
+  | node_modules
+  | server\.js
+  | .*\.lock
+  | other_non_python_directories
+)/
+'''

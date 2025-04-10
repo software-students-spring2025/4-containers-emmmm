@@ -1,5 +1,4 @@
-# Use an official lightweight Python image based on Alpine Linux.
-FROM python:3.10-alpine
+FROM python:3.13-alpine
 
 # Set the working directory in the container.
 WORKDIR /usr/src/app

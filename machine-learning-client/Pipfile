@@ -6,8 +6,16 @@ name = "pypi"
 [packages]
 pylint = "*"
 black = "*"
+requests = "*"
+sounddevice = "*"
+scipy = "*"
+pymongo = "*"
+speechbrain = "*"
+torchaudio = "*"
+torch = "*"
+python-dotenv = "*"
+
 
 [dev-packages]
-
-[requires]
-python_version = "3.10"
+pytest = "*"
+coverage = "*"

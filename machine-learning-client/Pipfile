@@ -14,6 +14,7 @@ speechbrain = "*"
 torchaudio = "*"
 torch = "*"
 python-dotenv = "*"
+tomli = "*"
 
 
 [dev-packages]

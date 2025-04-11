@@ -10,6 +10,5 @@ def main():
     emotion = analyze_emotion(audio_path)
     print("Final Result:", emotion)
 
-
 if __name__ == "__main__":
     main()

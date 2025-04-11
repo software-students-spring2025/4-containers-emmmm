@@ -15,6 +15,7 @@ torchaudio = "*"
 torch = "*"
 python-dotenv = "*"
 tomli = "*"
+astroid = ">=3.1.0" 
 
 
 [dev-packages]

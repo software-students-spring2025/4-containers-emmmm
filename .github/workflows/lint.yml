@@ -22,6 +22,7 @@ jobs:
           python -m pip install pipenv
           pipenv sync --dev --python $(which python)
           pipenv install tomli
+          pipenv install "astroid>=3.1.0"
           pipenv shell --fancy --python $(which python)
       - name: Lint with pylint
         if: ${{ hashFiles(format('{0}/**/*.py', matrix.subdir)) != '' }}

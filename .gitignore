@@ -9,7 +9,7 @@
 *~
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+pycache/
 *.py[cod]
 *$py.class
 
@@ -106,7 +106,7 @@ ipython_config.py
 #Pipfile.lock
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
+pypackages/
 
 # Celery stuff
 celerybeat-schedule
@@ -147,3 +147,32 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Byte-compiled / optimized / DLL files
+pycache/
+*.py[cod]
+*$py.class
+
+# Pipenv
+Pipfile.lock
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Ignore HuggingFace model cache and downloaded models
+machine-learning-client/wav2vec2_checkpoints/
+machine-learning-client/pretrained_models/
+
+# Ignore audio files
+*.wav
+*.mp3
+
+# Ignore virtual environments
+.env/
+.venv/
+
+# Ignore logs or debug output
+*.log

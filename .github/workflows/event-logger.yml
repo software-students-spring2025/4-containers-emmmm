@@ -35,6 +35,7 @@ jobs:
           pipenv install build
           pipenv install requests
           pipenv install gitcommitlogger
+          pipenv install tomli
       - name: Log pull request opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: |

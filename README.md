@@ -43,5 +43,7 @@ docker-compose up
 http://127.0.0.1:6000
 ```
 
+---
+
 ## References
 The pre-trained model in machine learning client part is from .

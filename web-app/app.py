@@ -4,8 +4,9 @@ This module defines a Flask web application that handles audio file uploads
 and renders the main index page.
 """
 
-from flask import Flask, render_template, request
-from db import db
+import requests
+from flask import Flask, render_template, request, jsonify
+from db import db, ml_client_host
 
 app = Flask(__name__)
 
@@ -28,10 +29,15 @@ def upload():
         return {"error": "No audio file provided"}, 400
 
     audio_file = request.files["audio"]
-    filename = audio_file.filename  # Use the filename for logging or storage.
+    filename = audio_file.filename
     file_record = {"audio_file_name": filename, "result": "processing"}
     db.file.insert_one(file_record)
-    return {"message": f"Audio '{filename}' uploaded successfully"}, 200
+    
+    response = requests.post(
+        f"{ml_client_host}/analyze", files={"audio": file_record}, timeout=100
+    )
+    return jsonify(response.json()), response.status_code
+
 
 
 if __name__ == "__main__":

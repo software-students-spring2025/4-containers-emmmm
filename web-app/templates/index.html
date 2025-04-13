@@ -100,7 +100,7 @@
     const stopBtn = document.getElementById('stopBtn');
     const statusText = document.getElementById('status');
     const audioPlayback = document.getElementById('audioPlayback');
-
+  
     // Function to start recording
     startBtn.addEventListener('click', async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -122,13 +122,23 @@
         
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
+        
+        statusText.innerHTML = 'Uploading and analyzing...';
+        
         fetch('/upload', {
           method: 'POST',
           body: formData
         })
         .then(response => response.json())
         .then(data => {
-          statusText.innerHTML = 'Audio uploaded successfully';
+          if (data.error) {
+            statusText.innerHTML = `Error: ${data.error}`;
+          } else if (data.result && data.result.emotion) {
+            const emotion = data.result.emotion.emotion;
+            statusText.innerHTML = `Detected emotion: <strong>${emotion}</strong>`;
+          } else {
+            statusText.innerHTML = 'Audio uploaded successfully';
+          }
         })
         .catch(error => {
           statusText.innerHTML = 'Upload failed';

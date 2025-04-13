@@ -1,0 +1,29 @@
+services:
+  web:
+    build: ./web-app
+    ports:
+      - "5050:5050"
+    depends_on:
+      - mongodb
+      - ml-client
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+      - ML_CLIENT_HOST=http://ml-client:6000
+
+  ml-client:
+    build: ./machine-learning-client
+    ports:
+      - "6000:6000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/
+
+
+  mongodb:
+    image: mongo:6.0 
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

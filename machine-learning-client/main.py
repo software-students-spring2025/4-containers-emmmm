@@ -5,7 +5,6 @@ from datetime import datetime
 import pymongo
 from flask import Flask, request, jsonify
 
-from audio_recorder import record_audio
 from emotion_analyzer import analyze_emotion
 
 app = Flask(__name__)

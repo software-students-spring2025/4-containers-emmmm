@@ -2,18 +2,18 @@ services:
   web:
     build: ./web-app
     ports:
-      - "5050:5050"
+      - "8000:8000"
     depends_on:
       - mongodb
       - ml-client
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
-      - ML_CLIENT_HOST=http://ml-client:6000
+      - ML_CLIENT_HOST=http://ml-client:6000  # Change port from 6000 to 8000 here
 
   ml-client:
     build: ./machine-learning-client
     ports:
-      - "6000:6000"
+      - "6000:6000"  # Change port from 6000 to 8000 here
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
 

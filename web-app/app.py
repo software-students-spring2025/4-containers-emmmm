@@ -1,9 +1,9 @@
 import os
+import json
 import requests
 from flask import Flask, render_template, request, jsonify
 import pymongo
 from dotenv import load_dotenv
-import json
 
 # Load environment variables
 load_dotenv()
@@ -39,13 +39,10 @@ def upload():
     # Check if audio file exists in request
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
-    
     audio = request.files.get("audio")
-    
     # Check if filename is empty
     if audio.filename == "":
         return jsonify({"error": "No selected file"}), 400
-    
     try:
         # Send file to ML client for analysis
         response = requests.post(
@@ -53,7 +50,6 @@ def upload():
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
             timeout=60  # Increased timeout for ML processing
         )
-        
         # Check if response is valid
         try:
             result = response.json()
@@ -68,7 +64,6 @@ def upload():
         return jsonify({
             "error": f"Failed to connect to ML client: {str(error)}"
         }), 500
-
 @app.route("/health", methods=["GET"])
 def health_check():
     """
@@ -79,15 +74,14 @@ def health_check():
         "service": "web",
         "mongodb_connected": db is not None,
     }
-    
     # Check ML client connection
     try:
         ml_response = requests.get(f"{ml_client_host}/health", timeout=5)
         status["ml_client_connected"] = ml_response.status_code == 200
     except:
         status["ml_client_connected"] = False
-    
     return jsonify(status)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
+    

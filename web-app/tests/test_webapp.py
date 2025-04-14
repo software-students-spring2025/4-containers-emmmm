@@ -9,7 +9,6 @@ import io
 import requests
 from app import app
 
-
 class TestWebApp(unittest.TestCase):
     """Test cases for the web application."""
 
@@ -80,6 +79,7 @@ class TestWebApp(unittest.TestCase):
         assert "No selected file" in data["error"]
 
     @patch("app.requests.post")
+
     def test_upload_ml_client_error(self, mock_post):
         """Test handling of ML client errors."""
         # Mock a connection error
@@ -121,7 +121,6 @@ class TestWebApp(unittest.TestCase):
     @patch("app.DB", new=MagicMock())  # Patch DB to not be None
     def test_health_check_all_services_up(self, mock_requests_get):
         """Test health check when all services are up."""
-
         # Mock ML client response
         mock_response = MagicMock()
         mock_response.status_code = 200

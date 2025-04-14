@@ -30,10 +30,12 @@ except pymongo.errors.ServerSelectionTimeoutError as err:
     print(f"MongoDB connection error: {err}")
     DB = None
 
+
 @app.route("/")
 def home():
     """Render the main index page."""
     return render_template("index.html")
+
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -53,21 +55,25 @@ def upload():
         response = requests.post(
             f"{ml_client_host}/analyze",
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
-            timeout=600  # Increased timeout for ML processing
+            timeout=600,  # Increased timeout for ML processing
         )
         # Check if response is valid
         try:
             result = response.json()
             return jsonify(result), response.status_code
         except json.JSONDecodeError:
-            return jsonify({
-                "error": "ML Client did not return valid JSON",
-                "raw_response": response.text
-            }), 500        
+            return (
+                jsonify(
+                    {
+                        "error": "ML Client did not return valid JSON",
+                        "raw_response": response.text,
+                    }
+                ),
+                500,
+            )
     except requests.RequestException as error:
-        return jsonify({
-            "error": f"Failed to connect to ML client: {str(error)}"
-        }), 500
+        return jsonify({"error": f"Failed to connect to ML client: {str(error)}"}), 500
+
 
 @app.route("/health", methods=["GET"])
 def health_check():
@@ -85,8 +91,9 @@ def health_check():
         status["ml_client_connected"] = ml_response.status_code == 200
     except requests.RequestException as error:
         status["ml_client_connected"] = False
-        print(f"ML client health check error: {e}")
+        print(f"ML client health check error: {error}")
     return jsonify(status)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

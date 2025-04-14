@@ -11,11 +11,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Mock torch modules
+
 class MockTorch:
     """Mocked torch module."""
+
     def no_grad(self):
         """Mock no_grad context manager."""
+
         class NoGradContext:
             def __enter__(self):
                 return None
@@ -26,47 +28,48 @@ class MockTorch:
         return NoGradContext()
 
     @staticmethod
-    def argmax(tensor):
+    def argmax(_):
         """Mock argmax function."""
         mock_result = MagicMock()
         mock_result.item.return_value = 0
         return mock_result
 
     @staticmethod
-    def tensor(value):
+    def tensor(value):  # pylint: disable=unused-argument
         """Mock tensor function."""
         return value
 
 
 class MockFunctional:
     """Mocked torch.nn.functional module."""
+
     @staticmethod
-    def softmax(tensor, dim=0):
+    def softmax(_, __=0):  # pylint: disable=unused-argument
         """Mock softmax function."""
         mock_probs = MagicMock()
         mock_probs.__getitem__.return_value.item.return_value = 0.85
         return mock_probs
 
 
-# Mock torch.nn and functional
 torch_mock = MockTorch()
 torch_mock.nn = MagicMock()
 torch_mock.nn.functional = MockFunctional()
 
-# Mock the torchaudio module
+
 class MockTorchaudio:
     """Mocked torchaudio module."""
+
     @staticmethod
-    def load(file_path):
+    def load(_):  # pylint: disable=unused-argument
         """Mock audio loading."""
         return MagicMock(), MagicMock()
 
 
-# Mock the speechbrain module
 class MockEncoderClassifier:
     """Mocked SpeechBrain EncoderClassifier."""
+
     @staticmethod
-    def from_hparams(source, savedir):
+    def from_hparams(_, __):  # pylint: disable=unused-argument
         """Mocked from_hparams method."""
         mock_classifier = MagicMock()
         mock_classifier.mods = MagicMock()
@@ -82,12 +85,10 @@ class MockEncoderClassifier:
         return mock_classifier
 
 
-# Create mock for speechbrain
 speechbrain_mock = MagicMock()
 speechbrain_mock.inference = MagicMock()
 speechbrain_mock.inference.EncoderClassifier = MockEncoderClassifier
 
-# Add mocks to sys.modules
 sys.modules["torch"] = torch_mock
 sys.modules["torch.nn"] = torch_mock.nn
 sys.modules["torch.nn.functional"] = torch_mock.nn.functional
@@ -95,10 +96,8 @@ sys.modules["torchaudio"] = MockTorchaudio()
 sys.modules["speechbrain"] = speechbrain_mock
 sys.modules["speechbrain.inference"] = speechbrain_mock.inference
 
-# Add path to import modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Now we can safely import our modules
 from main import app, analyze_emotion  # pylint: disable=wrong-import-position
 
 
@@ -124,11 +123,10 @@ def client():
         yield test_client
 
 
-# Create dummy audio data for testing
 DUMMY_AUDIO = b"mock audio data"
 
 
-def test_analyze_no_file(client):
+def test_analyze_no_file(client):  # pylint: disable=redefined-outer-name
     """Test error handling when no file is uploaded."""
     response = client.post("/analyze")
     assert response.status_code == 400
@@ -138,7 +136,7 @@ def test_analyze_no_file(client):
 
 
 @patch("main.analyze_emotion")
-def test_analyze_with_error(mock_analyze, client):
+def test_analyze_with_error(mock_analyze, client):  # pylint: disable=redefined-outer-name
     """Test handling of errors during analysis."""
     mock_analyze.side_effect = Exception("Analysis failed")
 

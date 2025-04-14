@@ -6,10 +6,9 @@ import json
 import unittest
 from unittest.mock import patch, MagicMock
 import io
-from flask import url_for
 import pytest
 import requests
-from app import app as flask_app
+from web-app.app import app as flask_app
 
 class TestWebApp(unittest.TestCase):
     """Test cases for the web application."""
@@ -178,11 +177,9 @@ class TestWebApp(unittest.TestCase):
         assert data['status'] == 'ok'  # Overall status still ok
         assert data['ml_client_connected'] is False
 
-# Fixture for pytest
 @pytest.fixture
-def client():
+def test_client():
     """Create a test client for the app."""
     with flask_app.test_client() as client:
         with flask_app.app_context():
             yield client
-

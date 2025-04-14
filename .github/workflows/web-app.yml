@@ -42,4 +42,4 @@ jobs:
       - name: Run tests and check coverage
         working-directory: web-app
         run: |
-          pytest --cov=app /tests/test_webapp.py
+          pytest --cov=app tests/test_webapp.py

@@ -9,6 +9,7 @@ import io
 import requests
 from app import app
 
+
 class TestWebApp(unittest.TestCase):
     """Test cases for the web application."""
 
@@ -79,7 +80,6 @@ class TestWebApp(unittest.TestCase):
         assert "No selected file" in data["error"]
 
     @patch("app.requests.post")
-
     def test_upload_ml_client_error(self, mock_post):
         """Test handling of ML client errors."""
         # Mock a connection error

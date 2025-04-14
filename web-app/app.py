@@ -36,6 +36,7 @@ def home():
     """Render the main index page."""
     return render_template("index.html")
 
+
 @app.route("/upload", methods=["POST"])
 def upload():
     """

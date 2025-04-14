@@ -1,8 +1,11 @@
 sounddevice==0.5.1
 scipy>=1.15.0
+werkzeug
 pymongo>=4.0.0
 speechbrain>=1.0.0
 torchaudio>=2.0.0
 torch>=2.0.0
 python-dotenv>=1.0.0
-Flask==2.2.3
+Flask
+requests==2.26.0
+pydub==0.25.1

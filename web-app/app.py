@@ -1,3 +1,8 @@
+"""
+Flask web application for Voice Emotion Detection.
+This module handles web routes and communication with the ML client.
+"""
+
 import os
 import json
 import requests
@@ -19,11 +24,11 @@ try:
     client = pymongo.MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
     # Verify connection works
     client.server_info()
-    db = client["emmmm"]
+    DB = client["emmmm"]
     print("Connected to MongoDB successfully")
 except pymongo.errors.ServerSelectionTimeoutError as err:
     print(f"MongoDB connection error: {err}")
-    db = None
+    DB = None
 
 @app.route("/")
 def home():
@@ -39,17 +44,21 @@ def upload():
     # Check if audio file exists in request
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
+    
     audio = request.files.get("audio")
+    
     # Check if filename is empty
     if audio.filename == "":
         return jsonify({"error": "No selected file"}), 400
+    
     try:
         # Send file to ML client for analysis
         response = requests.post(
-            f"{ml_client_host}/analyze", 
+            f"{ml_client_host}/analyze",
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
             timeout=60  # Increased timeout for ML processing
         )
+        
         # Check if response is valid
         try:
             result = response.json()
@@ -64,6 +73,7 @@ def upload():
         return jsonify({
             "error": f"Failed to connect to ML client: {str(error)}"
         }), 500
+
 @app.route("/health", methods=["GET"])
 def health_check():
     """
@@ -72,16 +82,18 @@ def health_check():
     status = {
         "status": "ok",
         "service": "web",
-        "mongodb_connected": db is not None,
+        "mongodb_connected": DB is not None,
     }
+    
     # Check ML client connection
     try:
         ml_response = requests.get(f"{ml_client_host}/health", timeout=5)
         status["ml_client_connected"] = ml_response.status_code == 200
-    except:
+    except Exception as e:
         status["ml_client_connected"] = False
+        print(f"ML client health check error: {e}")
+    
     return jsonify(status)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
-    

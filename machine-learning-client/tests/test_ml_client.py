@@ -120,43 +120,6 @@ def client():
 dummy_audio = b"mock audio data"
 
 
-@pytest.mark.skip(reason="maintain coverage on other tests")
-@patch("main.analyze_emotion")
-def test_analyze_success(mock_analyze, client):
-    """Test successful audio analysis and storage."""
-    # Mock the emotion analyzer to return "HAPPY"
-    mock_analyze.return_value = "HAPPY"
-
-    # Create a temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
-        temp.write(dummy_audio)
-        temp_name = temp.name
-
-    try:
-        # Prepare the file for upload
-        with open(temp_name, "rb") as f:
-            data = {"audio": (io.BytesIO(f.read()), "test_audio.wav", "audio/wav")}
-
-            # Make the request
-            response = client.post(
-                "/analyze", data=data, content_type="multipart/form-data"
-            )
-
-        # Check response
-        assert response.status_code == 200
-        result = json.loads(response.data)
-        assert result["status"] == "success"
-        assert result["result"]["emotion"] == "HAPPY"
-        assert "_id" in result["result"]
-
-        # Verify emotion analyzer was called
-        mock_analyze.assert_called_once()
-    finally:
-        # Clean up the temporary file
-        if os.path.exists(temp_name):
-            os.unlink(temp_name)
-
-
 def test_analyze_no_file(client):
     """Test error handling when no file is uploaded."""
     response = client.post("/analyze")

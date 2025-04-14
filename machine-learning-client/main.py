@@ -5,7 +5,6 @@ import os
 import pymongo
 import tempfile
 
-
 app = Flask(__name__)
 mongo_uri = os.environ.get("MONGO_URI", "mongodb://mongodb:27017/")
 client = pymongo.MongoClient(mongo_uri)
@@ -46,6 +45,6 @@ def analyze():
         if os.path.exists(temp_file.name):
             os.unlink(temp_file.name)
 
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=6000)
-    

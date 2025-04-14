@@ -248,3 +248,9 @@ def test_emotion_analyzer(
     # Verify result
     assert result == "HAPPY"
 
+
+def test_health_check():
+    """Test health check endpoint."""
+    with app.test_client() as client:
+        response = client.get("/")
+        assert response.status_code == 200

@@ -44,13 +44,10 @@ def upload():
     # Check if audio file exists in request
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
-    
     audio = request.files.get("audio")
-    
     # Check if filename is empty
     if audio.filename == "":
         return jsonify({"error": "No selected file"}), 400
-    
     try:
         # Send file to ML client for analysis
         response = requests.post(
@@ -58,7 +55,6 @@ def upload():
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
             timeout=60  # Increased timeout for ML processing
         )
-        
         # Check if response is valid
         try:
             result = response.json()
@@ -67,8 +63,7 @@ def upload():
             return jsonify({
                 "error": "ML Client did not return valid JSON",
                 "raw_response": response.text
-            }), 500
-            
+            }), 500        
     except requests.RequestException as error:
         return jsonify({
             "error": f"Failed to connect to ML client: {str(error)}"
@@ -84,15 +79,13 @@ def health_check():
         "service": "web",
         "mongodb_connected": DB is not None,
     }
-    
     # Check ML client connection
     try:
         ml_response = requests.get(f"{ml_client_host}/health", timeout=5)
         status["ml_client_connected"] = ml_response.status_code == 200
-    except Exception as e:
+    except requests.RequestException as error:
         status["ml_client_connected"] = False
         print(f"ML client health check error: {e}")
-    
     return jsonify(status)
 
 if __name__ == "__main__":

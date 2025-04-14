@@ -3,7 +3,7 @@
 ![Web App CI](https://github.com/software-students-spring2025/4-containers-emmmm/actions/workflows/web-app.yml/badge.svg)
 
 
-# Containerized App Exercise
+# Voice Emotion Detector
 ---
 
 ## Team Members
@@ -16,7 +16,7 @@
 
 ## Project Overview
 
-Our project is containerized web application that allows users to record audio in the browser, and detects the emotional content analyzing by machine learning models.
+Voice Emotion Detector is a containerized web application that allows users to record audio in the browser, and detects the emotional content analyzing by machine learning models.
 
 ---
 

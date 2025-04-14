@@ -1,9 +1,6 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
 
 # Containerized App Exercise
-
-Build a containerized app that uses machine learning. See [instructions](./instructions.md) for details.
-
 ---
 
 ## Team Members
@@ -40,10 +37,11 @@ docker-compose up
 ### 3. Visit the Web through Browser
 
 ```bash
-http://127.0.0.1:8000/
+http://127.0.0.1:6000
 ```
 
 ---
 
 ## References
-The pre-trained model in machine learning client part is from .
+The pre-trained model in machine learning client part is from Hugging Face https://huggingface.co/speechbrain/emotion-recognition-wav2vec2-IEMOCAP, which is an audio emotion recognition model. 
+

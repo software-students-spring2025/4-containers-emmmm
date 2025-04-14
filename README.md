@@ -40,7 +40,7 @@ docker-compose up
 ### 3. Visit the Web through Browser
 
 ```bash
-http://127.0.0.1:6000
+http://127.0.0.1:8000/
 ```
 
 ---

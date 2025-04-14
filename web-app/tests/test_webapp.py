@@ -56,7 +56,7 @@ class TestWebApp(unittest.TestCase):
         # Verify ML client was called correctly
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
-        assert "http://ml-client:6000/analyze" in args
+        assert "http://localhost:6000/analyze" in args
         assert "files" in kwargs
         assert "audio" in kwargs["files"]
 

@@ -118,25 +118,6 @@ class TestWebApp(unittest.TestCase):
         assert "ML Client did not return valid JSON" in data["error"]
 
     @patch("app.requests.get")
-    @patch("app.client")
-    def test_health_check_all_services_up(self, mock_mongo_client, mock_requests_get):
-        """Test health check when all services are up."""
-        # Mock MongoDB connection
-        mock_mongo_client.server_info.return_value = True
-        # Mock ML client response
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_requests_get.return_value = mock_response
-        # Make request
-        response = self.client.get("/health")
-        # Check response
-        assert response.status_code == 200
-        data = json.loads(response.data)
-        assert data["status"] == "ok"
-        assert data["mongodb_connected"] is True
-        assert data["ml_client_connected"] is True
-
-    @patch("app.requests.get")
     @patch("app.DB", new=MagicMock())  # Patch DB to not be None
     def test_health_check_all_services_up(self, mock_requests_get):
         """Test health check when all services are up."""

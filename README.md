@@ -1,4 +1,4 @@
-![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
+![Lint-free](https://github.com/software-students-spring2025/4-containers-emmmm/actions/workflows/lint.yml/badge.svg)
 ![ML Client CI](https://github.com/software-students-spring2025/4-containers-emmmm/actions/workflows/ml-client.yml/badge.svg)
 ![Web App CI](https://github.com/software-students-spring2025/4-containers-emmmm/actions/workflows/web-app.yml/badge.svg)
 

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voice Emotion Detector</title>
   <style>
     body {
@@ -78,6 +79,52 @@
       margin-top: 20px;
       width: 100%;
     }
+
+    .result-container {
+      margin-top: 30px;
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #f8f9fa;
+      display: none;
+    }
+
+    .emotion {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      margin: 10px 0;
+    }
+
+    .confidence {
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #28a745;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+
+    .error-message {
+      color: #dc3545;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 <body>
@@ -90,68 +137,106 @@
     </p>
     <!-- Audio element for playback -->
     <audio id="audioPlayback" controls style="display: none;"></audio>
+
+    <!-- Error message display -->
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- Results container -->
+    <div id="resultContainer" class="result-container">
+      <h2>Analysis Result</h2>
+      <div id="resultContent"></div>
+    </div>
   </div>
   
   <script>
-    let mediaRecorder;
-    let recordedChunks = [];
-    let audioBlob;
+    // DOM elements
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
     const statusText = document.getElementById('status');
     const audioPlayback = document.getElementById('audioPlayback');
-  
+    const resultContainer = document.getElementById('resultContainer');
+    const resultContent = document.getElementById('resultContent');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    // Global variables
+    let mediaRecorder;
+    let recordedChunks = [];
+    let audioBlob;
+    let stream;
+    
+    // Function to show error messages
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      statusText.textContent = 'Error occurred';
+    }
+    
+    // Function to hide error messages
+    function hideError() {
+      errorMessage.style.display = 'none';
+    }
+    
     // Function to start recording
     startBtn.addEventListener('click', async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      
-      mediaRecorder.addEventListener('dataavailable', (e) => {
-        if (e.data.size > 0) {
-          recordedChunks.push(e.data);
-        }
-      });
-      
-      mediaRecorder.addEventListener('stop', () => {
-        audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-        recordedChunks = [];
+      try {
+        hideError();
         
-        const audioURL = URL.createObjectURL(audioBlob);
-        audioPlayback.src = audioURL;
-        audioPlayback.style.display = 'block';
-        
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.webm');
-        
-        statusText.innerHTML = 'Uploading and analyzing...';
-        
-        fetch('/upload', {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            statusText.innerHTML = `Error: ${data.error}`;
-          } else if (data.result && data.result.emotion) {
-            const emotion = data.result.emotion.emotion;
-            statusText.innerHTML = `Detected emotion: <strong>${emotion}</strong>`;
-          } else {
-            statusText.innerHTML = 'Audio uploaded successfully';
-          }
-        })
-        .catch(error => {
-          statusText.innerHTML = 'Upload failed';
-          console.error('Upload error:', error);
+        // Request microphone access
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
         });
-      });
-      
-      mediaRecorder.start();
-      statusText.innerHTML = '<div class="recording-indicator"></div>Recording...';
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
+        
+        // Create media recorder
+        const options = { mimeType: 'audio/webm' };
+        try {
+          mediaRecorder = new MediaRecorder(stream, options);
+        } catch (e) {
+          console.warn('audio/webm not supported, trying audio/ogg');
+          mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg; codecs=opus' });
+        }
+        
+        // Set up data handling
+        recordedChunks = [];
+        mediaRecorder.addEventListener('dataavailable', (e) => {
+          if (e.data.size > 0) {
+            recordedChunks.push(e.data);
+          }
+        });
+        
+        // Set up stop handler
+        mediaRecorder.addEventListener('stop', () => {
+          // Create audio blob from recorded chunks
+          const mimeType = mediaRecorder.mimeType;
+          audioBlob = new Blob(recordedChunks, { type: mimeType });
+          
+          // Create URL for audio playback
+          const audioURL = URL.createObjectURL(audioBlob);
+          audioPlayback.src = audioURL;
+          audioPlayback.style.display = 'block';
+          
+          // Stop all tracks in the stream
+          stream.getTracks().forEach(track => track.stop());
+          
+          // Upload the audio file
+          uploadAudio(audioBlob, mimeType);
+        });
+        
+        // Start recording
+        mediaRecorder.start();
+        statusText.innerHTML = '<div class="recording-indicator"></div>Recording...';
+        resultContainer.style.display = 'none';
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+      } catch (err) {
+        console.error('Error accessing microphone:', err);
+        showError(`Could not access microphone: ${err.message}`);
+      }
     });
-
+    
     // Function to stop recording
     stopBtn.addEventListener('click', () => {
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -161,6 +246,76 @@
       startBtn.disabled = false;
       stopBtn.disabled = true;
     });
+
+    // Function to upload audio
+    function uploadAudio(blob, mimeType) {
+      statusText.innerHTML = 'Uploading and analyzing audio... <div class="loading"></div>';
+      hideError();
+      
+      // Create form data for upload
+      const formData = new FormData();
+      // Use proper extension based on mime type
+      const extension = mimeType.includes('webm') ? 'webm' : 
+                        mimeType.includes('ogg') ? 'ogg' : 'wav';
+      formData.append('audio', blob, `recording.${extension}`);
+      
+      // Send to server
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.error || `Server responded with status: ${response.status}`);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        } else if (data.status === "success" && data.result) {
+          // Display result from the ML service
+          displayResult(data.result);
+        } else {
+          throw new Error('Invalid response format from server');
+        }
+      })
+      .catch(error => {
+        showError(`Upload failed: ${error.message}`);
+        console.error('Upload error:', error);
+        statusText.textContent = 'Analysis failed';
+      });
+    }
+    
+    // Function to display results
+    function displayResult(result) {
+      // Update status
+      statusText.textContent = 'Analysis complete!';
+      
+      // Check if result contains the emotion field
+      if (!result.emotion) {
+        showError('Result did not contain emotion data');
+        return;
+      }
+      
+      // Display the emotion result
+      resultContainer.style.display = 'block';
+      
+      // Format the timestamp from the server if it exists, otherwise use current time
+      const timestamp = result.timestamp 
+        ? new Date(result.timestamp).toLocaleString()
+        : new Date().toLocaleString();
+      
+      // Get emotion and ensure it's a string
+      const emotion = (result.emotion || '').toUpperCase();
+      
+      resultContent.innerHTML = `
+        <div class="emotion">${emotion}</div>
+        <div>Analyzed at: ${timestamp}</div>
+      `;
+    }
   </script>
 </body>
 </html>

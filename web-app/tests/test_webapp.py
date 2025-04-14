@@ -8,6 +8,7 @@ from unittest.mock import patch, MagicMock
 import io
 from flask import url_for
 import pytest
+import requests
 from app import app as flask_app
 
 class TestWebApp(unittest.TestCase):
@@ -45,23 +46,19 @@ class TestWebApp(unittest.TestCase):
         }
         mock_response.status_code = 200
         mock_post.return_value = mock_response
-
         # Create a mock audio file
         audio_file = (io.BytesIO(b"mock audio data"), 'test_audio.wav')
-        
         # Make the request
         response = self.client.post(
             '/upload',
             data={'audio': audio_file},
             content_type='multipart/form-data'
         )
-        
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data['status'] == 'success'
         assert data['result']['emotion'] == 'HAPPY'
-        
         # Verify ML client was called correctly
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
@@ -95,17 +92,14 @@ class TestWebApp(unittest.TestCase):
         """Test handling of ML client errors."""
         # Mock a connection error
         mock_post.side_effect = requests.RequestException("ML client connection error")
-        
         # Create a mock audio file
         audio_file = (io.BytesIO(b"mock audio data"), 'test_audio.wav')
-        
         # Make the request
         response = self.client.post(
             '/upload',
             data={'audio': audio_file},
             content_type='multipart/form-data'
         )
-        
         # Check response
         assert response.status_code == 500
         data = json.loads(response.data)
@@ -121,17 +115,14 @@ class TestWebApp(unittest.TestCase):
         mock_response.text = "Not a JSON response"
         mock_response.status_code = 200
         mock_post.return_value = mock_response
-        
         # Create a mock audio file
         audio_file = (io.BytesIO(b"mock audio data"), 'test_audio.wav')
-        
         # Make the request
         response = self.client.post(
             '/upload',
             data={'audio': audio_file},
             content_type='multipart/form-data'
         )
-        
         # Check response
         assert response.status_code == 500
         data = json.loads(response.data)
@@ -144,15 +135,12 @@ class TestWebApp(unittest.TestCase):
         """Test health check when all services are up."""
         # Mock MongoDB connection
         mock_mongo_client.server_info.return_value = True
-        
         # Mock ML client response
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_requests_get.return_value = mock_response
-        
         # Make request
         response = self.client.get('/health')
-        
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
@@ -168,10 +156,8 @@ class TestWebApp(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_requests_get.return_value = mock_response
-        
         # Make request
         response = self.client.get('/health')
-        
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
@@ -184,10 +170,8 @@ class TestWebApp(unittest.TestCase):
         """Test health check when ML client is down."""
         # Mock ML client error
         mock_requests_get.side_effect = requests.RequestException("ML client down")
-        
         # Make request
         response = self.client.get('/health')
-        
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
@@ -202,5 +186,3 @@ def client():
         with flask_app.app_context():
             yield client
 
-# Add missing import at the top
-import requests

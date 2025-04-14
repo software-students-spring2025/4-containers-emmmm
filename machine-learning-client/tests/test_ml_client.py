@@ -14,7 +14,7 @@ import pytest
 
 class MockTorch:
     """Mock implementation of the torch module for testing purposes.
-    
+
     This class provides mock implementations of the PyTorch functionality
     needed for testing the emotion detection system without requiring the
     actual PyTorch library.

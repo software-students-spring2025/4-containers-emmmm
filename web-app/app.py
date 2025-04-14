@@ -63,7 +63,7 @@ def upload():
             return jsonify({
                 "error": "ML Client did not return valid JSON",
                 "raw_response": response.text
-            }), 500        
+            }), 500
     except requests.RequestException as error:
         return jsonify({
             "error": f"Failed to connect to ML client: {str(error)}"
@@ -85,7 +85,7 @@ def health_check():
         status["ml_client_connected"] = ml_response.status_code == 200
     except requests.RequestException as error:
         status["ml_client_connected"] = False
-        print(f"ML client health check error: {e}")
+        print(f"ML client health check error: {error}")
     return jsonify(status)
 
 if __name__ == "__main__":

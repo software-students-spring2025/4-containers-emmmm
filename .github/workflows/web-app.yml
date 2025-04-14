@@ -39,6 +39,6 @@ jobs:
           pip install Flask pymongo requests==2.31.0 python-dotenv pytest
 
       - name: Run tests and check coverage
-        working-directory: web_app
+        working-directory: web-app
         run: |
           pytest --cov=app /tests/test_webapp.py

@@ -36,7 +36,6 @@ def home():
     """Render the main index page."""
     return render_template("index.html")
 
-
 @app.route("/upload", methods=["POST"])
 def upload():
     """
@@ -55,7 +54,8 @@ def upload():
         response = requests.post(
             f"{ml_client_host}/analyze",
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
-            timeout=600,  # Increased timeout for ML processing
+
+            timeout=60  # Increased timeout for ML processing
         )
         # Check if response is valid
         try:

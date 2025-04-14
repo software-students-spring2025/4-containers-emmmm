@@ -45,4 +45,3 @@ http://127.0.0.1:6000
 ## References
 The pre-trained model in machine learning client part is from Hugging Face https://huggingface.co/speechbrain/emotion-recognition-wav2vec2-IEMOCAP, which is an audio emotion recognition model. 
 
-

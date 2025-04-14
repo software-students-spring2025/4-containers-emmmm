@@ -1,6 +1,7 @@
 FROM python:3.10-slim
-WORKDIR /app
+WORKDIR /client
 COPY requirements.txt .
+RUN apt-get update && apt-get install -y ffmpeg
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]

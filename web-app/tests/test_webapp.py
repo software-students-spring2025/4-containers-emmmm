@@ -8,14 +8,14 @@ from unittest.mock import patch, MagicMock
 import io
 import pytest
 import requests
-import app as flask_app
+from app import app
 
 class TestWebApp(unittest.TestCase):
     """Test cases for the web application."""
 
     def setUp(self):
         """Set up test client and other test variables."""
-        self.app = flask_app
+        self.app = app
         self.app.config['TESTING'] = True
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
@@ -160,7 +160,7 @@ class TestWebApp(unittest.TestCase):
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert data['status'] == 'ok'  # Overall status still ok
+        assert data['status'] == 'ok'
         assert data['mongodb_connected'] is False
         assert data['ml_client_connected'] is True
 
@@ -174,12 +174,13 @@ class TestWebApp(unittest.TestCase):
         # Check response
         assert response.status_code == 200
         data = json.loads(response.data)
-        assert data['status'] == 'ok'  # Overall status still ok
+        assert data['status'] == 'ok'
         assert data['ml_client_connected'] is False
 
 @pytest.fixture
 def test_client():
     """Create a test client for the app."""
-    with flask_app.test_client() as client:
-        with flask_app.app_context():
+    from app import app  # Import the app inside the fixture
+    with app.test_client() as client:
+        with app.app_context():
             yield client

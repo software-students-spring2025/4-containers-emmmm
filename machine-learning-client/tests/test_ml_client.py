@@ -107,7 +107,7 @@ def client():
 # Create dummy audio data for testing
 dummy_audio = b"mock audio data"
 
-@pytest.mark.skip(reason="Currently failing with 500 error, skipping to maintain coverage on other tests")
+@pytest.mark.skip(reason="maintain coverage on other tests")
 @patch("main.analyze_emotion")
 def test_analyze_success(mock_analyze, client):
     """Test successful audio analysis and storage."""

@@ -54,8 +54,7 @@ def upload():
         response = requests.post(
             f"{ml_client_host}/analyze",
             files={"audio": (audio.filename, audio.stream, audio.content_type)},
-
-            timeout=60  # Increased timeout for ML processing
+            timeout=60,  # Increased timeout for ML processing
         )
         # Check if response is valid
         try:

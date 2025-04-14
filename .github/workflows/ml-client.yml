@@ -1,4 +1,4 @@
-name: ML Client CI Pipeline
+name: Client CI Pipeline
 
 on:
   pull_request:
@@ -29,6 +29,6 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          PYTHONPATH: ${{ github.workspace }}
+          PYTHONPATH: ${{ github.workspace }}/machine-learning-client
         run: |
-          pytest --cov=machine-learning-client /tests/test_ml_client.py
+          pytest --cov=. tests/test_ml_client.py

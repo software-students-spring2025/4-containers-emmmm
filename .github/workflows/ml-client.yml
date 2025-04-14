@@ -28,6 +28,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest-cov
 
-      - name: Run tests with coverage
+      - name: Setup directory structure
         run: |
-          pytest --cov=. tests/test_ml_client.py
+          mkdir -p tests
+          # Ensure

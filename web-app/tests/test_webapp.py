@@ -176,11 +176,3 @@ class TestWebApp(unittest.TestCase):
         data = json.loads(response.data)
         assert data['status'] == 'ok'
         assert data['ml_client_connected'] is False
-
-@pytest.fixture
-def test_client():
-    """Create a test client for the app."""
-    from app import app  # Import the app inside the fixture
-    with app.test_client() as client:
-        with app.app_context():
-            yield client

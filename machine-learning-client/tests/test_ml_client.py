@@ -29,6 +29,7 @@ class MockTorch:
         """Mock no_grad context manager."""
 
         class NoGradContext:
+            """Context manager that mimics torch.no_grad() functionality."""
             def __enter__(self):
                 return None
 

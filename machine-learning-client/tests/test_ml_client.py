@@ -21,16 +21,16 @@ class TestMLClient(unittest.TestCase):
     def setUp(self):
         """Set up test client and other test variables."""
         self.app = app
-        self.app.config['TESTING'] = True
+        self.app.config["TESTING"] = True
         self.client = self.app.test_client()
 
-    @patch('main.analyze_emotion')
-    @patch('main.pymongo.MongoClient')
+    @patch("main.analyze_emotion")
+    @patch("main.pymongo.MongoClient")
     def test_analyze_success(self, mock_mongo, mock_analyze):
         """Test successful audio analysis and storage."""
         # Mock the emotion analyzer
         mock_analyze.return_value = "HAPPY"
-        
+
         # Mock MongoDB client
         mock_db = MagicMock()
         mock_collection = MagicMock()
@@ -70,6 +70,7 @@ class TestMLClient(unittest.TestCase):
             args, _ = mock_collection.insert_one.call_args
             assert args[0]['emotion'] == 'HAPPY'
             
+
         finally:
             # Clean up temporary file
             if os.path.exists(temp_name):
@@ -77,6 +78,7 @@ class TestMLClient(unittest.TestCase):
 
     def test_analyze_no_file(self):
         """Test error handling when no file is uploaded."""
+
         response = self.client.post('/analyze')
         assert response.status_code == 400
         result = json.loads(response.data)
@@ -84,6 +86,7 @@ class TestMLClient(unittest.TestCase):
         assert 'No file part' in result['error']
 
     @patch('main.analyze_emotion')
+
     def test_analyze_with_error(self, mock_analyze):
         """Test handling of errors during analysis."""
         # Mock analyzer to raise an exception
@@ -117,6 +120,7 @@ class TestMLClient(unittest.TestCase):
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
 
+
 class TestEmotionAnalyzer(unittest.TestCase):
     """Test cases for the emotion analyzer component."""
     
@@ -125,11 +129,11 @@ class TestEmotionAnalyzer(unittest.TestCase):
     @patch('emotion_analyzer.torch.argmax')
     @patch('emotion_analyzer.F.softmax')
     def test_analyze_emotion(self, mock_softmax, mock_argmax, mock_load, mock_classifier):
+
         """Test the emotion analyzer functionality."""
         # Mock classifier
         mock_classifier_instance = MagicMock()
         mock_classifier.return_value = mock_classifier_instance
-        
         # Mock wav2vec2 output
         mock_classifier_instance.mods.wav2vec2.return_value = MagicMock()
         mock_classifier_instance.mods.avg_pool.return_value = MagicMock()

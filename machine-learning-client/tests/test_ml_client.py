@@ -30,6 +30,7 @@ class MockTorch:
 
         class NoGradContext:
             """Context manager that mimics torch.no_grad() functionality."""
+
             def __enter__(self):
                 return None
 
@@ -157,7 +158,9 @@ def test_analyze_no_file(client):  # pylint: disable=redefined-outer-name
 
 
 @patch("main.analyze_emotion")
-def test_analyze_with_error(mock_analyze, client):  # pylint: disable=redefined-outer-name
+def test_analyze_with_error(
+    mock_analyze, client
+):  # pylint: disable=redefined-outer-name
     """Test handling of errors during analysis."""
     mock_analyze.side_effect = Exception("Analysis failed")
 
@@ -167,9 +170,7 @@ def test_analyze_with_error(mock_analyze, client):  # pylint: disable=redefined-
 
     try:
         with open(temp_name, "rb") as file:
-            data = {
-                "audio": (io.BytesIO(file.read()), "test_audio.wav", "audio/wav")
-            }
+            data = {"audio": (io.BytesIO(file.read()), "test_audio.wav", "audio/wav")}
 
         response = client.post(
             "/analyze", data=data, content_type="multipart/form-data"

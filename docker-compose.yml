@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   web:
     build: ./web-app
@@ -8,22 +10,36 @@ services:
       - ml-client
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
-      - ML_CLIENT_HOST=http://ml-client:6000  # Change port from 6000 to 8000 here
+      - ML_CLIENT_HOST=http://ml-client:6000
+    volumes:
+      - ./web-app:/app
+    networks:
+      - app-network
 
   ml-client:
     build: ./machine-learning-client
     ports:
-      - "6000:6000"  # Change port from 6000 to 8000 here
+      - "6000:6000"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
-
+    volumes:
+      - ./machine-learning-client:/app
+      - ml-model-data:/app/pretrained_models
+    networks:
+      - app-network
 
   mongodb:
     image: mongo:6.0 
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - app-network
 
 volumes:
   mongo-data:
+  ml-model-data:
+
+networks:
+  app-network:

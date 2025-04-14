@@ -1,19 +1,15 @@
-# Core dependencies for the ML client
 Flask>=2.0.0
 pymongo>=4.0.0
 requests>=2.26.0
 python-dotenv>=1.0.0
 
-# ML model dependencies
 torch>=2.0.0
 torchaudio>=2.0.0
 speechbrain>=1.0.0
 transformers>=4.30.0
 
-# Optional acceleration for transformers
 accelerate>=0.20.0
 
-# Keep these only if you're sure they're used elsewhere in the project
 sounddevice==0.5.1
 scipy>=1.15.0
 pydub==0.25.1

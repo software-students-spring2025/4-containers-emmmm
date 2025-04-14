@@ -1,9 +1,6 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
 
-![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
-
 # Containerized App Exercise
-
 ---
 
 ## Team Members
@@ -47,4 +44,5 @@ http://127.0.0.1:6000
 
 ## References
 The pre-trained model in machine learning client part is from Hugging Face https://huggingface.co/speechbrain/emotion-recognition-wav2vec2-IEMOCAP, which is an audio emotion recognition model. 
+
 

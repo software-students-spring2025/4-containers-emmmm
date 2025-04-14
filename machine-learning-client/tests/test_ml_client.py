@@ -7,14 +7,15 @@ import os
 import json
 import tempfile
 import sys
-import pytest
 from unittest.mock import MagicMock, patch
-import numpy as np
 
+import pytest
 
 # Mock torch modules
 class MockTorch:
+    """Mocked torch module."""
     def no_grad(self):
+        """Mock no_grad context manager."""
         class NoGradContext:
             def __enter__(self):
                 return None
@@ -24,39 +25,49 @@ class MockTorch:
 
         return NoGradContext()
 
-    def argmax(self, tensor):
+    @staticmethod
+    def argmax(tensor):
+        """Mock argmax function."""
         mock_result = MagicMock()
         mock_result.item.return_value = 0
         return mock_result
 
-    def tensor(self, value):
+    @staticmethod
+    def tensor(value):
+        """Mock tensor function."""
         return value
 
 
-# Create mock for functional module
 class MockFunctional:
-    def softmax(self, tensor, dim=0):
+    """Mocked torch.nn.functional module."""
+    @staticmethod
+    def softmax(tensor, dim=0):
+        """Mock softmax function."""
         mock_probs = MagicMock()
         mock_probs.__getitem__.return_value.item.return_value = 0.85
         return mock_probs
 
 
-# Create torch.nn
+# Mock torch.nn and functional
 torch_mock = MockTorch()
 torch_mock.nn = MagicMock()
 torch_mock.nn.functional = MockFunctional()
 
-
 # Mock the torchaudio module
 class MockTorchaudio:
-    def load(self, file_path):
+    """Mocked torchaudio module."""
+    @staticmethod
+    def load(file_path):
+        """Mock audio loading."""
         return MagicMock(), MagicMock()
 
 
 # Mock the speechbrain module
 class MockEncoderClassifier:
+    """Mocked SpeechBrain EncoderClassifier."""
     @staticmethod
     def from_hparams(source, savedir):
+        """Mocked from_hparams method."""
         mock_classifier = MagicMock()
         mock_classifier.mods = MagicMock()
         mock_classifier.mods.wav2vec2 = MagicMock()
@@ -65,9 +76,7 @@ class MockEncoderClassifier:
 
         mock_classifier.hparams = MagicMock()
         mock_classifier.hparams.label_encoder = MagicMock()
-        mock_classifier.hparams.label_encoder.decode_ndim = MagicMock(
-            return_value="HAPPY"
-        )
+        mock_classifier.hparams.label_encoder.decode_ndim.return_value = "HAPPY"
         mock_classifier.hparams.label_encoder.expect_len = MagicMock()
 
         return mock_classifier
@@ -90,10 +99,9 @@ sys.modules["speechbrain.inference"] = speechbrain_mock.inference
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Now we can safely import our modules
-from main import app, analyze_emotion
+from main import app, analyze_emotion  # pylint: disable=wrong-import-position
 
 
-# Mock MongoDB
 @pytest.fixture(autouse=True)
 def mock_mongo_client(monkeypatch):
     """Automatically apply MongoDB client mock to all tests."""
@@ -117,44 +125,7 @@ def client():
 
 
 # Create dummy audio data for testing
-dummy_audio = b"mock audio data"
-
-
-@pytest.mark.skip(reason="maintain coverage on other tests")
-@patch("main.analyze_emotion")
-def test_analyze_success(mock_analyze, client):
-    """Test successful audio analysis and storage."""
-    # Mock the emotion analyzer to return "HAPPY"
-    mock_analyze.return_value = "HAPPY"
-
-    # Create a temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
-        temp.write(dummy_audio)
-        temp_name = temp.name
-
-    try:
-        # Prepare the file for upload
-        with open(temp_name, "rb") as f:
-            data = {"audio": (io.BytesIO(f.read()), "test_audio.wav", "audio/wav")}
-
-            # Make the request
-            response = client.post(
-                "/analyze", data=data, content_type="multipart/form-data"
-            )
-
-        # Check response
-        assert response.status_code == 200
-        result = json.loads(response.data)
-        assert result["status"] == "success"
-        assert result["result"]["emotion"] == "HAPPY"
-        assert "_id" in result["result"]
-
-        # Verify emotion analyzer was called
-        mock_analyze.assert_called_once()
-    finally:
-        # Clean up the temporary file
-        if os.path.exists(temp_name):
-            os.unlink(temp_name)
+DUMMY_AUDIO = b"mock audio data"
 
 
 def test_analyze_no_file(client):
@@ -169,31 +140,27 @@ def test_analyze_no_file(client):
 @patch("main.analyze_emotion")
 def test_analyze_with_error(mock_analyze, client):
     """Test handling of errors during analysis."""
-    # Mock analyzer to raise an exception
     mock_analyze.side_effect = Exception("Analysis failed")
 
-    # Create a temporary file
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
-        temp.write(dummy_audio)
+        temp.write(DUMMY_AUDIO)
         temp_name = temp.name
 
     try:
-        # Prepare the file for upload
-        with open(temp_name, "rb") as f:
-            data = {"audio": (io.BytesIO(f.read()), "test_audio.wav", "audio/wav")}
+        with open(temp_name, "rb") as file:
+            data = {
+                "audio": (io.BytesIO(file.read()), "test_audio.wav", "audio/wav")
+            }
 
-            # Make the request
-            response = client.post(
-                "/analyze", data=data, content_type="multipart/form-data"
-            )
+        response = client.post(
+            "/analyze", data=data, content_type="multipart/form-data"
+        )
 
-        # Check response
         assert response.status_code == 500
         result = json.loads(response.data)
         assert "error" in result
         assert "Analysis failed" in result["error"]
     finally:
-        # Clean up the temporary file
         if os.path.exists(temp_name):
             os.unlink(temp_name)
 
@@ -207,15 +174,12 @@ def test_emotion_analyzer(
     mock_no_grad, mock_softmax, mock_argmax, mock_load, mock_classifier
 ):
     """Test the emotion analyzer functionality."""
-    # Configure no_grad context manager
     mock_context = MagicMock()
     mock_no_grad.return_value.__enter__.return_value = mock_context
 
-    # Mock classifier
     mock_classifier_instance = MagicMock()
     mock_classifier.return_value = mock_classifier_instance
 
-    # Mock wav2vec2 output
     mock_wav2vec_out = MagicMock()
     mock_classifier_instance.mods.wav2vec2.return_value = mock_wav2vec_out
 
@@ -226,24 +190,14 @@ def test_emotion_analyzer(
     mock_classifier_instance.mods.output_mlp.return_value = mock_logits
     mock_logits.squeeze.return_value = MagicMock()
 
-    # Mock torchaudio load
     mock_load.return_value = (MagicMock(), MagicMock())
 
-    # Mock softmax probabilities
     mock_probs = MagicMock()
     mock_softmax.return_value = mock_probs
+    mock_argmax.return_value.item.return_value = 2
+    mock_probs.__getitem__.return_value.item.return_value = 0.85
 
-    # Mock argmax result
-    mock_argmax.return_value.item.return_value = 2  # Index for "happy"
-
-    # Mock probability at index
-    mock_probs.__getitem__.return_value.item.return_value = 0.85  # 85% confidence
-
-    # Mock label decoder
     mock_classifier_instance.hparams.label_encoder.decode_ndim.return_value = "HAPPY"
 
-    # Call the function
     result = analyze_emotion("dummy_path.wav")
-
-    # Verify result
     assert result == "HAPPY"

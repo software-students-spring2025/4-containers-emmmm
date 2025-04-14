@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 import io
 import pytest
 import requests
-from web-app.app import app as flask_app
+import app as flask_app
 
 class TestWebApp(unittest.TestCase):
     """Test cases for the web application."""

@@ -1,11 +1,12 @@
 """
 Tests for the web application component of the Voice Emotion Detection system.
 """
-import requests
+import io
 import json
 import unittest
 from unittest.mock import patch, MagicMock
-import io
+
+import requests
 import pytest
 from app import app as flask_app
 

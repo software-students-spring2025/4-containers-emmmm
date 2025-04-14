@@ -13,7 +13,7 @@ import pytest
 from datetime import datetime
 
 # Import the Flask app from main.py
-from main import app, analyze_emotion
+from main import app
 
 
 class TestMLClient(unittest.TestCase):
@@ -32,12 +32,13 @@ class TestMLClient(unittest.TestCase):
         # Mock the emotion analyzer
         mock_analyze.return_value = "HAPPY"
 
-        # Mock MongoDB client
-        mock_db = MagicMock()
+        # Mock MongoDB client and collection
         mock_collection = MagicMock()
-        mock_mongo.return_value.__getitem__.return_value = mock_db
+        mock_db = MagicMock()
+        mock_mongo.return_value = mock_client = MagicMock()
+        mock_client.__getitem__.return_value = mock_db
         mock_db.__getitem__.return_value = mock_collection
-        mock_collection.insert_one.return_value.inserted_id = "mock_id"
+        mock_collection.insert_one.return_value = MagicMock(inserted_id="mock_id")
 
         # Create test audio file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp:
@@ -55,11 +56,11 @@ class TestMLClient(unittest.TestCase):
                 )
 
             # Check response
-            assert response.status_code == 200
+            self.assertEqual(response.status_code, 200)
             result = json.loads(response.data)
-            assert result["status"] == "success"
-            assert result["result"]["emotion"] == "HAPPY"
-            assert "_id" in result["result"]
+            self.assertEqual(result["status"], "success")
+            self.assertEqual(result["result"]["emotion"], "HAPPY")
+            self.assertIn("_id", result["result"])
 
             # Verify emotion analyzer was called
             mock_analyze.assert_called_once()
@@ -67,7 +68,7 @@ class TestMLClient(unittest.TestCase):
             # Verify MongoDB insert was called
             mock_collection.insert_one.assert_called_once()
             args, _ = mock_collection.insert_one.call_args
-            assert args[0]["emotion"] == "HAPPY"
+            self.assertEqual(args[0]["emotion"], "HAPPY")
 
         finally:
             # Clean up temporary file
@@ -77,10 +78,10 @@ class TestMLClient(unittest.TestCase):
     def test_analyze_no_file(self):
         """Test error handling when no file is uploaded."""
         response = self.client.post("/analyze")
-        assert response.status_code == 400
+        self.assertEqual(response.status_code, 400)
         result = json.loads(response.data)
-        assert "error" in result
-        assert "No file part" in result["error"]
+        self.assertIn("error", result)
+        self.assertIn("No file part", result["error"])
 
     @patch("main.analyze_emotion")
     def test_analyze_with_error(self, mock_analyze):
@@ -104,10 +105,10 @@ class TestMLClient(unittest.TestCase):
                 )
 
             # Check response
-            assert response.status_code == 500
+            self.assertEqual(response.status_code, 500)
             result = json.loads(response.data)
-            assert "error" in result
-            assert "Analysis failed" in result["error"]
+            self.assertIn("error", result)
+            self.assertIn("Analysis failed", result["error"])
 
         finally:
             # Clean up temporary file
@@ -159,7 +160,7 @@ class TestEmotionAnalyzer(unittest.TestCase):
         result = analyze_emotion("dummy_path.wav")
 
         # Verify result
-        assert result == "HAPPY"
+        self.assertEqual(result, "HAPPY")
 
         # Verify classifier was called
         mock_classifier.assert_called_once()

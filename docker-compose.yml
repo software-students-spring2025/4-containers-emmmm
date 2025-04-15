@@ -1,8 +1,8 @@
-version: '3'
+
 
 services:
   web:
-    build: ./web-app
+    build: ./web_app
     ports:
       - "8000:8000"
     depends_on:
@@ -12,18 +12,18 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/
       - ML_CLIENT_HOST=http://ml-client:6000
     volumes:
-      - ./web-app:/app
+      - ./web_app:/app
     networks:
       - app-network
 
   ml-client:
-    build: ./machine-learning-client
+    build: ./machine_learning_client
     ports:
       - "6000:6000"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/
     volumes:
-      - ./machine-learning-client:/app
+      - ./machine_learning_client:/app
       - ml-model-data:/app/pretrained_models
     networks:
       - app-network

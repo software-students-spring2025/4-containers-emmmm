@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 # Get environment variables with defaults
 mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
-ml_client_host = os.getenv("ML_CLIENT_HOST", "http://ml-client:6000")
+ml_client_host = os.getenv("ML_CLIENT_HOST", "http://ml-client:8000")
 
 # Connect to MongoDB
 try:
